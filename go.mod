@@ -1,4 +1,4 @@
-module github.com/ctdk/goiardi
+module github.com/e1ven/goiardi
 
 require (
 	github.com/BurntSushi/toml v0.3.1
