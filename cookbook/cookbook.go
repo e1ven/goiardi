@@ -406,9 +406,6 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 	}
 
 	for k, ec := range envConstraints {
-		if _, found := nodes[k]; !found {
-			continue
-		}
 		appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
 	}
 
