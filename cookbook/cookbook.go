@@ -394,7 +394,7 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 			meta.constraint = versionConstraint(q)
 		}
 		for _, ec := range envConstraints {
-			appendConstraint(meta.constraint, ec)
+			appendConstraint(meta.(*depMeta).constraint, ec)
 		}
 
 		nodes[cbName].Meta = meta
