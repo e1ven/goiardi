@@ -393,22 +393,34 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 			q, _ := gversion.NewConstraint(constraint)
 			meta.constraint = versionConstraint(q)
 		}
-		for _, ec := range envConstraints {
-			appendConstraint(meta.(*depMeta).constraint, ec)
-		}
 
 		nodes[cbName].Meta = meta
 		runListRef[i] = cbName
 	}
+
+  for k, ec := range envConstraints {
+    if _, found := nodes[k]; !found {
+            continue
+    }
+    appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
+  }
 
 	graphRoot := &depgraph.Noun{Name: "^runlist_root^"}
 	g := &depgraph.Graph{Name: "runlist", Root: graphRoot}
 
 	// fill in constraints for runlist deps now
 	for k, n := range nodes {
+
+		// Add all env constraints
+		for _, ec := range envConstraints {
+	    appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
+		}
+
 		d := &depgraph.Dependency{Name: fmt.Sprintf("%s-%s", g.Name, k), Source: graphRoot, Target: n, Constraints: []depgraph.Constraint{versionConstraint(n.Meta.(*depMeta).constraint)}}
 		graphRoot.Deps = append(graphRoot.Deps, d)
 	}
+
+
 
 	cbShelf := make(map[string]*Cookbook)
 	for _, cbName := range runListRef {
