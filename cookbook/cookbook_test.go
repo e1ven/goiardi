@@ -19,8 +19,6 @@ package cookbook
 import (
 	"encoding/gob"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
 	"testing"
 
@@ -169,12 +167,11 @@ func TestAllConstraints(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	minimal := cookbookDependencies["minimal"].(map[string]interface{})
-	fmt.Println(minimal)
 
+	minimal := cookbookDependencies["minimal"].(map[string]interface{})
 	version := minimal["version"]
 	if version != "1.0.0" {
-		panic(errors.New("wrong"))
+		t.Errorf("incorrect dependency version for `minimal`: %s", version)
 	}
 	metadata := minimal["metadata"].(map[string]interface{})
 	dependencies := metadata["dependencies"].(map[string]interface{})
