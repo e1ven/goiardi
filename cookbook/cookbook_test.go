@@ -35,6 +35,7 @@ type constraintTest struct {
 
 const minimalCookPath string = "./minimal-cook.json"
 const minimal110CookPath string = "./minimal-cook-1.1.0.json"
+const fooCookPath string = "./foo-cook.json"
 
 func TestLatestConstrained(t *testing.T) {
 	cbname := "minimal"
@@ -110,6 +111,7 @@ func TestLatestConstrained(t *testing.T) {
 func TestAllConstraints(t *testing.T) {
 	cbname := "minimal"
 	cb, _ := New(cbname)
+	fcb, _ := New("foo")
 
 	// "upload" files - make fake filestore entries
 	u := new(filestore.FileStore)
@@ -129,6 +131,15 @@ func TestAllConstraints(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+	}
+
+	fc, err := loadCookbookFromJSON(fooCookPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, cerr := fcb.NewVersion("1.2.3", fc); cerr != nil {
+		t.Error(cerr)
 	}
 
 	mc, err := loadCookbookFromJSON(minimalCookPath)
