@@ -19,9 +19,11 @@ package cookbook
 import (
 	"encoding/gob"
 	"encoding/json"
-	"github.com/ctdk/goiardi/filestore"
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/ctdk/goiardi/filestore"
 )
 
 type constraintTest struct {
@@ -102,6 +104,17 @@ func TestLatestConstrained(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestAllConstraints(t *testing.T) {
+	runList := []string{}
+	envConstraints := map[string]string{}
+	cookbookDependencies, err := DependsCookbooks(runList, envConstraints)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(cookbookDependencies)
 }
 
 func loadCookbookFromJSON(path string) (map[string]interface{}, error) {
