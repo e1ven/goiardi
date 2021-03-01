@@ -36,6 +36,8 @@ type constraintTest struct {
 const minimalCookPath string = "./minimal-cook.json"
 const minimal110CookPath string = "./minimal-cook-1.1.0.json"
 const fooCookPath string = "./foo-cook.json"
+const bar1CookPath string = "./bar-1-cook.json"
+const bar2CookPath string = "./bar-2-cook.json"
 
 func TestLatestConstrained(t *testing.T) {
 	cbname := "minimal"
@@ -112,6 +114,8 @@ func TestAllConstraints(t *testing.T) {
 	cbname := "minimal"
 	cb, _ := New(cbname)
 	fcb, _ := New("foo")
+	bcb1, _ := New("bar")
+	bcb2, _ := New("bar")
 
 	// "upload" files - make fake filestore entries
 	u := new(filestore.FileStore)
@@ -133,6 +137,26 @@ func TestAllConstraints(t *testing.T) {
 		}
 	}
 
+	bc1, err := loadCookbookFromJSON(bar1CookPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, cerr := bcb1.NewVersion("1.0.0", bc1); cerr != nil {
+		t.Error(cerr)
+	}
+
+	bc2, err := loadCookbookFromJSON(bar2CookPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, cerr := bcb2.NewVersion("2.0.0", bc2); cerr != nil {
+		t.Error(cerr)
+	}
+
+
+
 	fc, err := loadCookbookFromJSON(fooCookPath)
 	if err != nil {
 		t.Error(err)
@@ -152,7 +176,7 @@ func TestAllConstraints(t *testing.T) {
 	}
 
 	runList := []string{"minimal"}
-	envConstraints := map[string]string{"minimal": "1.0.0", "bar": "2.3.1"}
+	envConstraints := map[string]string{"minimal": "1.0.0", "bar": "2.0.0"}
 	cookbookDependencies, err := DependsCookbooks(runList, envConstraints)
 	if err != nil {
 		t.Error(err)
