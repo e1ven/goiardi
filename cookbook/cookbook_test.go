@@ -127,16 +127,6 @@ func TestAllConstraints(t *testing.T) {
 	rm := make(map[string]interface{})
 	gob.Register(rm)
 
-	a := []string{"foo", "b43166991a65cc7e711a018b93105544", "e2ff77580f69d7612e6a67640fdc2fe0", "5822b0e3808ed57308a0eff8b61f7dc2"}
-	var data []byte
-	for _, chk := range a {
-		f := &filestore.FileStore{Chksum: chk, Data: &data}
-		err := f.Save()
-		if err != nil {
-			t.Error(err)
-		}
-	}
-
 	bc1, err := loadCookbookFromJSON(bar1CookPath)
 	if err != nil {
 		t.Error(err)
