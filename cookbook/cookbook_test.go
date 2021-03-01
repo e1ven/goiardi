@@ -155,8 +155,6 @@ func TestAllConstraints(t *testing.T) {
 		t.Error(cerr)
 	}
 
-
-
 	fc, err := loadCookbookFromJSON(fooCookPath)
 	if err != nil {
 		t.Error(err)
@@ -181,9 +179,22 @@ func TestAllConstraints(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(cookbookDependencies["minimal"])
-	if true {
+	minimal := cookbookDependencies["minimal"].(map[string]interface{})
+	fmt.Println(minimal)
+
+	version := minimal["version"]
+	if version != "1.0.0" {
 		panic(errors.New("wrong"))
+	}
+	metadata := minimal["metadata"].(map[string]interface{})
+	dependencies := metadata["dependencies"].(map[string]interface{})
+	barVersion := dependencies["bar"]
+	if barVersion != "2.0.0" {
+		t.Errorf("incorrect dependency version for `bar`: %s", barVersion)
+	}
+	fooVersion := dependencies["foo"]
+	if fooVersion != "1.2.3" {
+		t.Errorf("incorrect dependency version for `foo`: %s", fooVersion)
 	}
 }
 
