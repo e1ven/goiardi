@@ -503,7 +503,7 @@ func (c *Cookbook) badConstraints(constraints versionConstraint) []string {
 	return bad
 }
 
-func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook, envConstraints map[string]string) (map[string]interface{}, error) {
+func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook, envConstraints map[string]string) {
 	depList := cbv.Metadata["dependencies"].(map[string]interface{})
 	for r, c2 := range depList {
 		if _, ok := nodes[r]; ok {
