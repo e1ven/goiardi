@@ -393,34 +393,25 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 			q, _ := gversion.NewConstraint(constraint)
 			meta.constraint = versionConstraint(q)
 		}
-
 		nodes[cbName].Meta = meta
 		runListRef[i] = cbName
 	}
 
-  for k, ec := range envConstraints {
-    if _, found := nodes[k]; !found {
-            continue
-    }
-    appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
-  }
+	for k, ec := range envConstraints {
+		if _, found := nodes[k]; !found {
+			continue
+		}
+		appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
+	}
 
 	graphRoot := &depgraph.Noun{Name: "^runlist_root^"}
 	g := &depgraph.Graph{Name: "runlist", Root: graphRoot}
 
 	// fill in constraints for runlist deps now
 	for k, n := range nodes {
-
-		// Add all env constraints
-		for _, ec := range envConstraints {
-	    appendConstraint(&nodes[k].Meta.(*depMeta).constraint, ec)
-		}
-
 		d := &depgraph.Dependency{Name: fmt.Sprintf("%s-%s", g.Name, k), Source: graphRoot, Target: n, Constraints: []depgraph.Constraint{versionConstraint(n.Meta.(*depMeta).constraint)}}
 		graphRoot.Deps = append(graphRoot.Deps, d)
 	}
-
-
 
 	cbShelf := make(map[string]*Cookbook)
 	for _, cbName := range runListRef {
@@ -432,6 +423,9 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 			nodes[cbName].Meta.(*depMeta).notFound = true
 			continue
 		}
+
+
+
 		cbShelf[cbName] = cb
 		cbv := cb.latestMultiConstraint(nodes[cbName].Meta.(*depMeta).constraint)
 		if cbv == nil {
@@ -439,7 +433,7 @@ func DependsCookbooks(runList []string, envConstraints map[string]string) (map[s
 			continue
 		}
 		nodes[cbName].Meta.(*depMeta).version = cbv.Version
-		cbv.getDependencies(g, nodes, cbShelf)
+		cbv.getDependencies(g, nodes, cbShelf, envConstraints)
 	}
 	nouns := make([]*depgraph.Noun, 1)
 	nouns[0] = graphRoot
@@ -511,7 +505,7 @@ func (c *Cookbook) badConstraints(constraints versionConstraint) []string {
 	return bad
 }
 
-func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook) {
+func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook, envConstraints map[string]string) (map[string]interface{}, error)) {
 	depList := cbv.Metadata["dependencies"].(map[string]interface{})
 	for r, c2 := range depList {
 		if _, ok := nodes[r]; ok {
@@ -557,7 +551,18 @@ func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]
 		appendConstraint(&nodes[r].Meta.(*depMeta).constraint, c)
 
 		cbShelf[r] = depCb
-		depCbv := depCb.latestMultiConstraint(nodes[r].Meta.(*depMeta).constraint)
+
+		found = false
+		for k, ec := range envConstraints {
+			if k == depCb {
+				depCbv := ec
+				found = true
+			}
+		}
+		if found == false {
+			depCbv := depCb.latestMultiConstraint(nodes[r].Meta.(*depMeta).constraint)
+		}
+
 		if depCbv == nil {
 			nodes[r].Meta.(*depMeta).noVersion = true
 			continue
@@ -570,7 +575,7 @@ func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]
 
 		nodes[r].Meta.(*depMeta).version = depCbv.Version
 
-		depCbv.getDependencies(g, nodes, cbShelf)
+		depCbv.getDependencies(g, nodes, cbShelf, envConstraints)
 	}
 }
 
