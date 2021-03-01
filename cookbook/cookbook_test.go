@@ -19,6 +19,7 @@ package cookbook
 import (
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -107,14 +108,48 @@ func TestLatestConstrained(t *testing.T) {
 }
 
 func TestAllConstraints(t *testing.T) {
-	runList := []string{}
-	envConstraints := map[string]string{}
-	cookbookDependencies, err := DependsCookbooks(runList, envConstraints)
+	cbname := "minimal"
+	cb, _ := New(cbname)
+
+	// "upload" files - make fake filestore entries
+	u := new(filestore.FileStore)
+	gob.Register(u)
+	c := new(Cookbook)
+	gob.Register(c)
+	v := new(CookbookVersion)
+	gob.Register(v)
+	rm := make(map[string]interface{})
+	gob.Register(rm)
+
+	a := []string{"foo", "b43166991a65cc7e711a018b93105544", "e2ff77580f69d7612e6a67640fdc2fe0", "5822b0e3808ed57308a0eff8b61f7dc2"}
+	var data []byte
+	for _, chk := range a {
+		f := &filestore.FileStore{Chksum: chk, Data: &data}
+		err := f.Save()
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	mc, err := loadCookbookFromJSON(minimalCookPath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	fmt.Println(cookbookDependencies)
+	if _, cerr := cb.NewVersion("1.0.0", mc); cerr != nil {
+		t.Error(cerr)
+	}
+
+	runList := []string{"minimal"}
+	envConstraints := map[string]string{"minimal": "1.0.0", "bar": "2.3.1"}
+	cookbookDependencies, err := DependsCookbooks(runList, envConstraints)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(cookbookDependencies["minimal"])
+	if true {
+		panic(errors.New("wrong"))
+	}
 }
 
 func loadCookbookFromJSON(path string) (map[string]interface{}, error) {
