@@ -503,7 +503,7 @@ func (c *Cookbook) badConstraints(constraints versionConstraint) []string {
 	return bad
 }
 
-func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook, envConstraints map[string]string) {
+func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]*depgraph.Noun, cbShelf map[string]*Cookbook, envConstraints map[string]string) (map[string]interface{}, error) {
 	depList := cbv.Metadata["dependencies"].(map[string]interface{})
 	for r, c2 := range depList {
 		if _, ok := nodes[r]; ok {
@@ -536,6 +536,7 @@ func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]
 			if err != nil {
 				nodes[r].Meta.(*depMeta).notFound = true
 				appendConstraint(&nodes[r].Meta.(*depMeta).constraint, c)
+
 				continue
 			}
 		} else {
@@ -546,14 +547,14 @@ func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]
 				continue
 			}
 		}
-		appendConstraint(&nodes[r].Meta.(*depMeta).constraint, c)
-
 		for k, ec := range envConstraints {
-			if k == depCb.Name {
+			//if k == depCb.Name {
     			appendConstraint(&nodes[r].Meta.(*depMeta).constraint, ec)
-			}
+				//	found=true
+			//}
 		}
-		
+		// appendConstraint(&nodes[r].Meta.(*depMeta).constraint, c)
+
 		cbShelf[r] = depCb
 		depCbv := depCb.latestMultiConstraint(nodes[r].Meta.(*depMeta).constraint)
 
