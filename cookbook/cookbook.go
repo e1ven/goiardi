@@ -549,7 +549,7 @@ func (cbv *CookbookVersion) getDependencies(g *depgraph.Graph, nodes map[string]
 		appendConstraint(&nodes[r].Meta.(*depMeta).constraint, c)
 
 		for k, ec := range envConstraints {
-			if k == depCb.CookbookName {
+			if k == depCb.Name {
     			appendConstraint(&nodes[r].Meta.(*depMeta).constraint, ec)
 			}
 		}
