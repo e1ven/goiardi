@@ -142,7 +142,7 @@ func TestAllConstraints(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, cerr := bcb1.NewVersion("1.0.0", bc1); cerr != nil {
+	if _, cerr := bcb1.NewVersion("1.1.0", bc1); cerr != nil {
 		t.Error(cerr)
 	}
 
